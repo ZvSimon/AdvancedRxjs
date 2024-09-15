@@ -1,12 +1,8 @@
 <h1>RxJS Course</h1>
-
-@if (data$ | async; as data) {
-  <div>{{ data.messagePromise }}</div>
-  <div>{{ data.foo }}</div>
-
-  @for (user of data.users; track $index) {
-    <div>{{ user.name }}</div>
-  }
+@if(state$ |async; as state){
+  <h2>{{state.apiUrl}}</h2>
+  <h2>{{state.realViews}}</h2>
+  <h2>{{state.roles}}</h2>
 }
 
 <router-outlet />

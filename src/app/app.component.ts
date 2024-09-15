@@ -1,7 +1,20 @@
-import { Component } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { Observable, combineLatest, from, fromEvent, of } from 'rxjs';
+import {Component} from '@angular/core';
+import {RouterLink, RouterOutlet} from '@angular/router';
+import {CommonModule} from '@angular/common';
+import {filter, map, Observable} from 'rxjs';
+
+
+interface BackendState {
+  api_url: string;
+  real_views: number;
+  roles: string[];
+}
+
+interface State {
+  apiUrl: string;
+  realViews: number;
+  roles: string[];
+}
 
 @Component({
   selector: 'app-root',
@@ -10,27 +23,27 @@ import { Observable, combineLatest, from, fromEvent, of } from 'rxjs';
   templateUrl: './app.component.html',
 })
 export class AppComponent {
-  users = [
-    { id: '1', name: 'John', age: 30 },
-    { id: '2', name: 'Jack', age: 35 },
-    { id: '3', name: 'Mike', age: 25 },
-  ];
-  messagePromise = new Promise((resolve) => {
-    setTimeout(() => {
-      resolve('Promise resolved');
-    }, 1000);
-  });
+  backendState$: Observable<BackendState | null> = new Observable(
+    (observer) => {
+      observer.next(null);
+      setTimeout(() => {
+        observer.next({
+          api_url: 'http://localhost:3004',
+          real_views: 1000,
+          roles: ['admin', 'user'],
+        });
+      }, 2000);
+    },
+  );
 
-  foo$ = new Observable((observer) => {
-    observer.next('foo');
-    setTimeout(() => {
-      observer.next('bar');
-    }, 3000);
-  });
-
-  data$ = combineLatest({
-    users: of(this.users),
-    messagePromise: from(this.messagePromise),
-    foo: this.foo$,
-  });
+  state$: Observable<State> = this.backendState$.pipe(
+    filter(Boolean),
+    map((backendState) => {
+      return {
+        apiUrl: backendState.api_url,
+        realViews: backendState.real_views,
+        roles: backendState.roles,
+      }
+    }),
+  )
 }
