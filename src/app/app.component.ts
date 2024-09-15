@@ -21,10 +21,13 @@ export class AppComponent {
   http = inject(HttpClient);
 
   constructor() {
-    const post$ = this.http.get<BackendState>('http://localhost:3004/posts');
-    const comments$ = this.http.get<BackendState>('http://localhost:3004/comments');
+    const post$ = this.http.get('http://localhost:3004/posts');
+    const comments$ = this.http.get('http://localhost:3004/comments');
     forkJoin({posts: post$, comments: comments$}).subscribe(result => {
       console.log(result)
+      console.log(result.posts)
+      console.log(result.comments)
+
     });
   }
 }
