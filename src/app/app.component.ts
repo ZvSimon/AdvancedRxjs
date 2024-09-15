@@ -1,8 +1,8 @@
 import {Component, inject} from '@angular/core';
 import {RouterLink, RouterOutlet} from '@angular/router';
 import {CommonModule} from '@angular/common';
-import {forkJoin} from 'rxjs';
 import {HttpClient} from "@angular/common/http";
+import {Observable, withLatestFrom} from "rxjs";
 
 
 interface BackendState {
@@ -21,13 +21,15 @@ export class AppComponent {
   http = inject(HttpClient);
 
   constructor() {
+    const customValue$ = new Observable((observer) => {
+      observer.next('initial value');
+      setTimeout(()=>{
+        observer.next('new value');
+      },1000);
+    });
     const post$ = this.http.get('http://localhost:3004/posts');
-    const comments$ = this.http.get('http://localhost:3004/comments');
-    forkJoin({posts: post$, comments: comments$}).subscribe(result => {
-      console.log(result)
-      console.log(result.posts)
-      console.log(result.comments)
-
+    post$.pipe(withLatestFrom(customValue$)).subscribe((result) => {
+      console.log(result);
     });
   }
 }
