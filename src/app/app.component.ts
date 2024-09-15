@@ -1,18 +1,13 @@
-import {Component} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {RouterLink, RouterOutlet} from '@angular/router';
 import {CommonModule} from '@angular/common';
-import {filter, map, Observable} from 'rxjs';
+import {forkJoin} from 'rxjs';
+import {HttpClient} from "@angular/common/http";
 
 
 interface BackendState {
   api_url: string;
   real_views: number;
-  roles: string[];
-}
-
-interface State {
-  apiUrl: string;
-  realViews: number;
   roles: string[];
 }
 
@@ -23,27 +18,13 @@ interface State {
   templateUrl: './app.component.html',
 })
 export class AppComponent {
-  backendState$: Observable<BackendState | null> = new Observable(
-    (observer) => {
-      observer.next(null);
-      setTimeout(() => {
-        observer.next({
-          api_url: 'http://localhost:3004',
-          real_views: 1000,
-          roles: ['admin', 'user'],
-        });
-      }, 2000);
-    },
-  );
+  http = inject(HttpClient);
 
-  state$: Observable<State> = this.backendState$.pipe(
-    filter(Boolean),
-    map((backendState) => {
-      return {
-        apiUrl: backendState.api_url,
-        realViews: backendState.real_views,
-        roles: backendState.roles,
-      }
-    }),
-  )
+  constructor() {
+    const post$ = this.http.get<BackendState>('http://localhost:3004/posts');
+    const comments$ = this.http.get<BackendState>('http://localhost:3004/comments');
+    forkJoin({posts: post$, comments: comments$}).subscribe(result => {
+      console.log(result)
+    });
+  }
 }
